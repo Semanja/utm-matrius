@@ -104,6 +104,8 @@ export default function BranchAnonse({
       utm_medium: customMedium.trim(),
       needs_url_slug: false,
       needs_manual_medium: false,
+      default_content: null,
+      default_term: null,
     });
     setStep("site");
   }
