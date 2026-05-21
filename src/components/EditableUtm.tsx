@@ -148,13 +148,17 @@ function AutoInput({
   );
 }
 
+function encodePreservePlaceholders(value: string): string {
+  return encodeURIComponent(value).replace(/%7B/g, "{").replace(/%7D/g, "}");
+}
+
 function assembleUrl(fields: UtmFields): string {
   // Собираем URL вручную, чтобы в режиме редактирования юзер мог писать что угодно
   // (даже невалидный URL — отображаем как есть)
   const parts: string[] = [];
   const add = (key: string, value: string) => {
     if (value && value.trim() !== "") {
-      parts.push(`${key}=${encodeURIComponent(value)}`);
+      parts.push(`${key}=${encodePreservePlaceholders(value)}`);
     }
   };
   add("utm_source", fields.source);

@@ -44,13 +44,24 @@ export default function BranchGuide({
 
   function selectSite(s: Site) {
     setSite(s);
-    setStep("placement");
+    // Если у компании единственное «место размещения» — подставляем автоматом
+    if (placements.length === 1) {
+      setPlacement(placements[0].value);
+      setStep("date");
+    } else {
+      setStep("placement");
+    }
   }
 
   function confirmCustomSite() {
     if (!customUrl.trim() || !customTag.trim()) return;
     setSite({ id: -1, url: customUrl.trim(), tag: customTag.trim() });
-    setStep("placement");
+    if (placements.length === 1) {
+      setPlacement(placements[0].value);
+      setStep("date");
+    } else {
+      setStep("placement");
+    }
   }
 
   function selectPlacement(p: string) {
@@ -75,8 +86,14 @@ export default function BranchGuide({
       setSite(null);
       setStep("site");
     } else if (step === "date") {
-      setPlacement("");
-      setStep("placement");
+      // Если место было подставлено автоматом (единственное) — назад к сайту
+      if (placements.length <= 1) {
+        setSite(null);
+        setStep("site");
+      } else {
+        setPlacement("");
+        setStep("placement");
+      }
     } else if (step === "result") setStep("date");
   }
 

@@ -13,13 +13,27 @@ type Step = "company" | "task-type" | "branch" | "empty";
 
 type TaskType = "announce" | "smm" | "guide" | "ads" | "custom";
 
-const TASK_TYPES: { value: TaskType; label: string; description: string }[] = [
-  { value: "announce", label: "Анонс", description: "Рассылка, бот, канал" },
-  { value: "smm", label: "СММ", description: "Пост в соцсетях" },
-  { value: "guide", label: "Гайд", description: "PDF с QR / ссылкой / картинкой" },
-  { value: "ads", label: "Реклама", description: "Я.Директ, ВК, внешние сервисы" },
-  { value: "custom", label: "Свой вариант", description: "Заполнить всё руками" },
+const ALL_TASK_TYPES: {
+  value: TaskType;
+  label: string;
+  description: string;
+  // null = доступен всем компаниям; массив — только перечисленным slug'ам
+  companies: string[] | null;
+}[] = [
+  { value: "announce", label: "Анонс", description: "Рассылка, бот, канал", companies: null },
+  { value: "smm", label: "СММ", description: "Пост в соцсетях", companies: ["matrius"] },
+  { value: "guide", label: "Гайд", description: "PDF с QR / ссылкой / картинкой", companies: null },
+  { value: "ads", label: "Реклама", description: "Я.Директ, ВК, внешние сервисы", companies: null },
+  { value: "custom", label: "Свой вариант", description: "Заполнить всё руками", companies: null },
 ];
+
+function taskTypesFor(companySlug: string) {
+  return ALL_TASK_TYPES.filter(
+    (t) => t.companies === null || t.companies.includes(companySlug)
+  );
+}
+
+const TASK_TYPES = ALL_TASK_TYPES;
 
 type Props = {
   companies: Company[];
@@ -87,8 +101,12 @@ export default function Wizard({ companies, data }: Props) {
         <StepCompany companies={companies} onSelect={selectCompany} />
       )}
 
-      {step === "task-type" && (
-        <StepTaskType onSelect={selectTaskType} onBack={back} />
+      {step === "task-type" && company && (
+        <StepTaskType
+          companySlug={company.slug}
+          onSelect={selectTaskType}
+          onBack={back}
+        />
       )}
 
       {step === "empty" && company && (
@@ -200,17 +218,20 @@ function StepCompany({
 }
 
 function StepTaskType({
+  companySlug,
   onSelect,
   onBack,
 }: {
+  companySlug: string;
   onSelect: (t: TaskType) => void;
   onBack: () => void;
 }) {
+  const types = taskTypesFor(companySlug);
   return (
     <section>
       <h2 className="text-xl font-semibold mb-4">Тип задачи</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {TASK_TYPES.map((t) => (
+        {types.map((t) => (
           <button
             key={t.value}
             onClick={() => onSelect(t.value)}
