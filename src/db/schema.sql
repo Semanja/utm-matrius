@@ -30,9 +30,15 @@ CREATE TABLE IF NOT EXISTS channels (
   utm_medium TEXT,
   needs_url_slug INTEGER DEFAULT 0,
   needs_manual_medium INTEGER DEFAULT 0,
+  default_content TEXT,
+  default_term TEXT,
   deleted_at TEXT,
   created_at TEXT DEFAULT (datetime('now'))
 );
+
+-- ALTER для существующих таблиц (миграция). Если колонки уже есть — ошибка проигнорируется в миграторе.
+ALTER TABLE channels ADD COLUMN default_content TEXT;
+ALTER TABLE channels ADD COLUMN default_term TEXT;
 
 -- Места размещения (для ветки Гайд)
 CREATE TABLE IF NOT EXISTS placements (

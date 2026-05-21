@@ -29,9 +29,20 @@ async function main() {
   console.log(`Applying ${statements.length} statements to ${url}...`);
 
   for (const stmt of statements) {
-    await db.execute(stmt);
-    const firstLine = stmt.split("\n")[0].slice(0, 60);
-    console.log(`  OK ${firstLine}...`);
+    try {
+      await db.execute(stmt);
+      const firstLine = stmt.split("\n")[0].slice(0, 60);
+      console.log(`  OK ${firstLine}...`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      // ALTER TABLE ADD COLUMN: пропускаем «column already exists»
+      if (stmt.startsWith("ALTER TABLE") && msg.includes("duplicate column")) {
+        const firstLine = stmt.split("\n")[0].slice(0, 60);
+        console.log(`  SKIP ${firstLine}... (column already exists)`);
+      } else {
+        throw e;
+      }
+    }
   }
 
   console.log("Migration complete.");

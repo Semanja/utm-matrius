@@ -22,6 +22,8 @@ export type Channel = {
   utm_medium: string | null;
   needs_url_slug: boolean;
   needs_manual_medium: boolean;
+  default_content: string | null;
+  default_term: string | null;
 };
 
 export type Placement = {
@@ -83,7 +85,7 @@ export async function getCompanyData(slug: string): Promise<CompanyData> {
 
   const channelsRes = await db.execute({
     sql: `SELECT id, branch, group_name, display_name, utm_source, utm_medium,
-                 needs_url_slug, needs_manual_medium
+                 needs_url_slug, needs_manual_medium, default_content, default_term
           FROM channels
           WHERE company_id = ? AND deleted_at IS NULL
           ORDER BY branch, group_name, display_name`,
@@ -116,6 +118,8 @@ export async function getCompanyData(slug: string): Promise<CompanyData> {
       utm_medium: r.utm_medium === null ? null : String(r.utm_medium),
       needs_url_slug: Number(r.needs_url_slug) === 1,
       needs_manual_medium: Number(r.needs_manual_medium) === 1,
+      default_content: r.default_content === null ? null : String(r.default_content),
+      default_term: r.default_term === null ? null : String(r.default_term),
     })),
     sites: sitesRes.rows.map((r) => ({
       id: Number(r.id),

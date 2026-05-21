@@ -7,11 +7,21 @@ import BranchAnonse from "./BranchAnonse";
 import BranchSmm from "./BranchSmm";
 import BranchGuide from "./BranchGuide";
 import BranchAds from "./BranchAds";
+import BranchSimple from "./BranchSimple";
 import ThemeSwitcher from "./ThemeSwitcher";
 
 type Step = "company" | "task-type" | "branch" | "empty";
 
-type TaskType = "announce" | "smm" | "guide" | "ads" | "custom";
+type TaskType =
+  | "announce"
+  | "smm"
+  | "guide"
+  | "ads"
+  | "funnel"
+  | "external"
+  | "blog"
+  | "getcourse"
+  | "custom";
 
 const ALL_TASK_TYPES: {
   value: TaskType;
@@ -22,6 +32,10 @@ const ALL_TASK_TYPES: {
 }[] = [
   { value: "announce", label: "Анонс", description: "Рассылка, бот, канал", companies: null },
   { value: "smm", label: "СММ", description: "Пост в соцсетях", companies: ["matrius"] },
+  { value: "funnel", label: "Воронка вебинара", description: "Письма, входы, шальной трафик", companies: ["zerocoder"] },
+  { value: "external", label: "Внешние выступления", description: "Спикерство, подкасты", companies: ["zerocoder"] },
+  { value: "blog", label: "Блог", description: "Статья, баннер, поп-ап в магазине", companies: ["zerocoder"] },
+  { value: "getcourse", label: "В Геткурсе", description: "Тренинги, вебинары, уроки, баннер", companies: ["zerocoder"] },
   { value: "guide", label: "Гайд", description: "PDF с QR / ссылкой / картинкой", companies: null },
   { value: "ads", label: "Реклама", description: "Я.Директ, ВК, внешние сервисы", companies: null },
   { value: "custom", label: "Свой вариант", description: "Заполнить всё руками", companies: null },
@@ -155,11 +169,34 @@ export default function Wizard({ companies, data }: Props) {
 
       {step === "branch" &&
         company &&
+        (taskType === "funnel" ||
+          taskType === "external" ||
+          taskType === "blog" ||
+          taskType === "getcourse") && (
+          <BranchSimple
+            branch={taskType}
+            branchLabel={
+              ALL_TASK_TYPES.find((t) => t.value === taskType)!.label
+            }
+            channels={data[company.slug]?.channels ?? []}
+            sites={data[company.slug]?.sites ?? []}
+            companySlug={company.slug}
+            onBack={back}
+            onReset={reset}
+          />
+        )}
+
+      {step === "branch" &&
+        company &&
         taskType &&
         taskType !== "announce" &&
         taskType !== "smm" &&
         taskType !== "guide" &&
-        taskType !== "ads" && (
+        taskType !== "ads" &&
+        taskType !== "funnel" &&
+        taskType !== "external" &&
+        taskType !== "blog" &&
+        taskType !== "getcourse" && (
           <StepBranchPlaceholder
             company={company}
             taskType={taskType}

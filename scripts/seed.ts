@@ -52,6 +52,8 @@ type Channel = {
   utm_medium: string | null;
   needs_url_slug?: number;
   needs_manual_medium?: number;
+  default_content?: string | null;
+  default_term?: string | null;
 };
 
 const channels: Channel[] = [
@@ -101,8 +103,8 @@ await db.execute({
 
 for (const c of channels) {
   await db.execute({
-    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium, default_content, default_term)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       matriusId,
       c.branch,
@@ -112,6 +114,8 @@ for (const c of channels) {
       c.utm_medium,
       c.needs_url_slug ?? 0,
       c.needs_manual_medium ?? 0,
+      c.default_content ?? null,
+      c.default_term ?? null,
     ],
   });
 }
@@ -185,12 +189,38 @@ const zerocoderChannels: Channel[] = [
   { branch: "guide", group_name: "email", display_name: "Почта", utm_source: "email", utm_medium: "zerocoder" },
   { branch: "guide", group_name: "telegram", display_name: "Телеграм-бот", utm_source: "telegram", utm_medium: "bot_zerocoder" },
   { branch: "guide", group_name: "vk", display_name: "ВК-бот", utm_source: "vk", utm_medium: "zerocoders" },
+
+  // FUNNEL — Воронка вебинара (10 каналов)
+  { branch: "funnel", group_name: "Продажное письмо", display_name: "Почта", utm_source: "email", utm_medium: "zerocoder", default_content: "funnel", default_term: "message-N" },
+  { branch: "funnel", group_name: "Продажное письмо", display_name: "ТГ-бот", utm_source: "telegram", utm_medium: "bot_zerocoder", default_content: "funnel", default_term: "message-N" },
+  { branch: "funnel", group_name: "Вход на вебинар", display_name: "Почта", utm_source: "", utm_medium: "", default_content: "email" },
+  { branch: "funnel", group_name: "Вход на вебинар", display_name: "ТГ-бот", utm_source: "", utm_medium: "", default_content: "telegram" },
+  { branch: "funnel", group_name: "Вход на вебинар", display_name: "СМС", utm_source: "", utm_medium: "", default_content: "sms" },
+  { branch: "funnel", group_name: "Шальной", display_name: "ТГ-бот", utm_source: "", utm_medium: "", default_content: "telegram-baza" },
+  { branch: "funnel", group_name: "Шальной", display_name: "ТГ-канал", utm_source: "", utm_medium: "", default_content: "channel_oqode" },
+  { branch: "funnel", group_name: "Шальной", display_name: "Нейросетевые покои", utm_source: "", utm_medium: "", default_content: "pokoi" },
+  { branch: "funnel", group_name: "Шальной", display_name: "Инстаграм", utm_source: "", utm_medium: "", default_content: "instagram" },
+  { branch: "funnel", group_name: "Шальной", display_name: "Нейрокот", utm_source: "", utm_medium: "", default_content: "neurocat-{utm}" },
+
+  // EXTERNAL — Внешние выступления (2 канала)
+  { branch: "external", group_name: null, display_name: "Спикерство", utm_source: "pr", utm_medium: "speech", default_content: "спикер" },
+  { branch: "external", group_name: null, display_name: "Подкаст", utm_source: "pr", utm_medium: "podcast", default_content: "спикер" },
+
+  // BLOG — Журнал (1 канал)
+  { branch: "blog", group_name: null, display_name: "Журнал", utm_source: "magazine", utm_medium: "article", default_content: "url-статья" },
+
+  // GETCOURSE — Геткурс (5 каналов)
+  { branch: "getcourse", group_name: null, display_name: "Все тренинги", utm_source: "getcourse", utm_medium: "zerocoder", default_content: null },
+  { branch: "getcourse", group_name: null, display_name: "Запись вебинара", utm_source: "site", utm_medium: "getcourse", default_content: "record" },
+  { branch: "getcourse", group_name: null, display_name: "Интенсив", utm_source: "site", utm_medium: "getcourse", default_content: "lesson" },
+  { branch: "getcourse", group_name: null, display_name: "Урок платного курса", utm_source: "site", utm_medium: "getcourse", default_content: "тег-урока" },
+  { branch: "getcourse", group_name: null, display_name: "Баннер", utm_source: "site", utm_medium: "getcourse", default_content: "banner" },
 ];
 
 for (const c of zerocoderChannels) {
   await db.execute({
-    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium, default_content, default_term)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       zerocoderId,
       c.branch,
@@ -200,6 +230,8 @@ for (const c of zerocoderChannels) {
       c.utm_medium,
       c.needs_url_slug ?? 0,
       c.needs_manual_medium ?? 0,
+      c.default_content ?? null,
+      c.default_term ?? null,
     ],
   });
 }
