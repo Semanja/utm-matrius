@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* ===== Темы ===== */
+/* Светлая (по умолчанию, глубокий фиолетовый акцент) */
+:root,
+[data-theme="light"] {
+  --bg: #f7f5fb;
+  --surface: #ffffff;
+  --text: #1f1b2e;
+  --text-muted: #6b6580;
+  --border: #e6e2ef;
+  --accent: #5b3fbf;
+  --accent-hover: #7a5fd9;
+  --accent-text: #ffffff;
+}
+
+/* Тёмная (чёрно-жёлтая) */
+[data-theme="dark"] {
+  --bg: #0e0e10;
+  --surface: #1a1a1d;
+  --text: #f5f5f0;
+  --text-muted: #8a8a82;
+  --border: #2a2a2d;
+  --accent: #facc15;
+  --accent-hover: #e0b200;
+  --accent-text: #0e0e10;
+}
+
+/* Zerocoder (тёмная, мятно-зелёный + фиолетовый) */
+[data-theme="zerocoder"] {
+  --bg: #18141f;
+  --surface: #221c2e;
+  --text: #ffffff;
+  --text-muted: #a89bc4;
+  --border: #3d2f56;
+  --accent: #4fe49a;
+  --accent-hover: #3dd088;
+  --accent-text: #1a1612;
+}
+
+/* Заголовки и breadcrumbs в Zerocoder — фиолетовые акценты */
+[data-theme="zerocoder"] h1,
+[data-theme="zerocoder"] h2 {
+  color: #b793ff;
+}
+
+/* Matrius (мягкая дневная, синий фон + оранжевый акцент) */
+[data-theme="matrius"] {
+  --bg: #dbe3ed;
+  --surface: #ffffff;
+  --text: #2a3447;
+  --text-muted: #5b79a8;
+  --border: #b8c7da;
+  --accent: #f26f3d;
+  --accent-hover: #d85d2d;
+  --accent-text: #ffffff;
+}
+
+/* Заголовки и breadcrumbs в Matrius — синие */
+[data-theme="matrius"] h1,
+[data-theme="matrius"] h2 {
+  color: #3d5a85;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  font-size: 19.25px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background 0.2s, color 0.2s;
+}

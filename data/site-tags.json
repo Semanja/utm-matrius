@@ -1,0 +1,50 @@
+{
+  "_comment": "Справочник сайтов и тегов (utm_campaign) для Matrius. Для нейро-страниц тег = 'neyro' (без веток — направление выбирается на самой странице).",
+  "entries": [
+    { "url": "https://matrius.online/freemaths", "tag": "show-math-flow-1" },
+    { "url": "https://matrius.online/mathdiagnostic", "tag": "show-math-flow-1" },
+    { "url": "https://matrius.online/mathdiagnostic2", "tag": "show-math-flow-1" },
+    { "url": "https://matrius.online/mathdiagnostic3", "tag": "show-math-flow-1" },
+    { "url": "https://matrius.online/mathdiagnostic4", "tag": "show-math-flow-1" },
+    { "url": "https://matrius.online/freemathsdiagnostics", "tag": "show-math-flow-1" },
+    { "url": "https://matrius.online/matematika", "tag": "show-math-flow-1" },
+
+    { "url": "https://matrius.online/triallessonspeedreading", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/freediagnostics", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids2", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids10", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids11", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids12", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids13", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/speedreadingkids14", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/thanksfreeregistraion", "tag": "show-sr-flow-1" },
+    { "url": "https://matrius.online/sckorochtenie", "tag": "show-sr-flow-1" },
+
+    { "url": "https://matrius.online/neurodiagnostics", "tag": "neyro" },
+    { "url": "https://matrius.online/neyroschool", "tag": "neyro" },
+    { "url": "https://matrius.online/neurourok", "tag": "neyro" },
+
+    { "url": "https://matrius.online/mathsfreediagnostics", "tag": "show-math-flow-3" },
+    { "url": "https://matrius.online/lesson30min", "tag": "lesson-flow-1" },
+    { "url": "https://matrius.online/freetestforchildren", "tag": "quiz-sr-flow-2" },
+
+    { "url": "https://matrius.online/onlinelogoped2", "tag": "show-logo-flow-1" },
+    { "url": "https://matrius.online/onlinelogoped", "tag": "show-logo-flow-1" },
+    { "url": "https://matrius.online/logopedia", "tag": "show-logo-flow-1" },
+
+    { "url": "https://matrius.online/giftspeedreading", "tag": "show-sr-flow-4" },
+    { "url": "https://matrius.online/getgift", "tag": "show-sr-flow-4-2" },
+    { "url": "https://matrius.online/", "tag": "lm-request" },
+    { "url": "https://matrius.online/mentalariphmetika", "tag": "show-ma-flow-2" },
+    { "url": "https://matrius.online/it", "tag": "show-it-flow-2" },
+
+    { "url": "https://matrius.online/nauchim-ponimat-matematiku", "tag": "show-math-flow-2" },
+    { "url": "https://matrius.online/besplatnyi-urok-po-matematike", "tag": "show-math-flow-2" },
+
+    { "url": "https://matrius.online/podgotovkakschkole", "tag": "show-preschool-flow-1" },
+    { "url": "https://matrius.online/russian", "tag": "show-ru-flow-1" },
+    { "url": "https://matrius.online/english", "tag": "show-en-flow-1" },
+    { "url": "https://matrius.online/olimpiyadnayamatematika", "tag": "show-math_olymp-flow-1" }
+  ]
+}
