@@ -91,6 +91,98 @@ export async function deleteSite(id: number) {
   revalidatePath("/admin/sites");
 }
 
+export type BulkRow = { url: string; tag: string };
+export type BulkResult = {
+  created: number;
+  updated: number;
+  skipped: number;
+  errors: string[];
+};
+
+export async function bulkImportSites(
+  rows: BulkRow[],
+  mode: "skip" | "overwrite"
+): Promise<BulkResult> {
+  await requireAuth();
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new Error("Пустой список");
+  }
+
+  const slug = await getAdminCompany();
+  const companyId = await getCompanyId(slug);
+
+  const result: BulkResult = { created: 0, updated: 0, skipped: 0, errors: [] };
+
+  for (const row of rows) {
+    const url = String(row.url || "").trim();
+    const tag = String(row.tag || "").trim();
+    if (!url || !tag) {
+      result.skipped++;
+      result.errors.push(`Пропущена строка с пустым полем: ${JSON.stringify(row)}`);
+      continue;
+    }
+
+    try {
+      // Ищем существующую запись (включая удалённые — чтобы восстанавливать)
+      const existing = await db.execute({
+        sql: `SELECT id, tag, deleted_at FROM sites WHERE company_id = ? AND url = ?`,
+        args: [companyId, url],
+      });
+
+      if (existing.rows.length > 0) {
+        const existingId = Number(existing.rows[0].id);
+        const existingTag = String(existing.rows[0].tag);
+        const isDeleted = existing.rows[0].deleted_at !== null;
+
+        if (existingTag === tag && !isDeleted) {
+          // Уже точно такая же запись — пропускаем тихо
+          result.skipped++;
+          continue;
+        }
+
+        if (mode === "skip") {
+          result.skipped++;
+          continue;
+        }
+
+        // Overwrite: обновляем тег + восстанавливаем если удалённая
+        await db.execute({
+          sql: `UPDATE sites SET tag = ?, deleted_at = NULL WHERE id = ?`,
+          args: [tag, existingId],
+        });
+        await logAudit(
+          "sites",
+          existingId,
+          "update",
+          { url, tag: existingTag, deleted: isDeleted },
+          { url, tag }
+        );
+        result.updated++;
+      } else {
+        const ins = await db.execute({
+          sql: `INSERT INTO sites (company_id, url, tag) VALUES (?, ?, ?)`,
+          args: [companyId, url, tag],
+        });
+        await logAudit(
+          "sites",
+          Number(ins.lastInsertRowid),
+          "create",
+          null,
+          { url, tag, company_id: companyId }
+        );
+        result.created++;
+      }
+    } catch (e) {
+      result.errors.push(
+        `${url}: ${e instanceof Error ? e.message : "ошибка"}`
+      );
+    }
+  }
+
+  revalidatePath("/admin/sites");
+  return result;
+}
+
 export async function restoreSite(id: number) {
   await requireAuth();
 

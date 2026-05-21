@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { createSite, updateSite, deleteSite, restoreSite } from "./actions";
+import BulkImport from "./BulkImport";
 
 type SiteRow = {
   id: number;
@@ -19,6 +20,15 @@ export default function SitesTable({ sites }: Props) {
   const [showDeleted, setShowDeleted] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
+  const [importing, setImporting] = useState(false);
+
+  const existingMap = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const s of sites) {
+      if (s.deleted_at === null) m.set(s.url, s.tag);
+    }
+    return m;
+  }, [sites]);
 
   const filtered = useMemo(() => {
     const f = filter.trim().toLowerCase();
@@ -53,10 +63,21 @@ export default function SitesTable({ sites }: Props) {
           onClick={() => {
             setCreating(true);
             setEditingId(null);
+            setImporting(false);
           }}
           className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)] transition"
         >
           + Добавить
+        </button>
+        <button
+          onClick={() => {
+            setImporting(true);
+            setCreating(false);
+            setEditingId(null);
+          }}
+          className="border border-[var(--border)] text-[var(--text)] rounded px-4 py-2 text-sm font-medium hover:border-[var(--accent)] transition"
+        >
+          📋 Импорт списком
         </button>
       </div>
 
@@ -64,6 +85,14 @@ export default function SitesTable({ sites }: Props) {
         <CreateForm
           onDone={() => setCreating(false)}
           onCancel={() => setCreating(false)}
+        />
+      )}
+
+      {importing && (
+        <BulkImport
+          existing={existingMap}
+          onCancel={() => setImporting(false)}
+          onDone={() => setImporting(false)}
         />
       )}
 
