@@ -4,10 +4,12 @@ import { useMemo, useState } from "react";
 import type { Site } from "@/db/queries";
 import { suggestSlugs } from "@/lib/translit";
 import EditableUtm from "./EditableUtm";
+import CustomSiteFinishButtons from "./CustomSiteFinishButtons";
 
 type Props = {
   sites: Site[];
   placements: { value: string; display_name: string | null }[];
+  companySlug: string;
   onBack: () => void;
   onReset: () => void;
 };
@@ -17,6 +19,7 @@ type GuideStep = "name" | "site" | "placement" | "date" | "result";
 export default function BranchGuide({
   sites,
   placements,
+  companySlug,
   onBack,
   onReset,
 }: Props) {
@@ -105,6 +108,7 @@ export default function BranchGuide({
           setCustomUrl={setCustomUrl}
           customTag={customTag}
           setCustomTag={setCustomTag}
+          companySlug={companySlug}
           onSelect={selectSite}
           onConfirmCustom={confirmCustomSite}
         />
@@ -271,6 +275,7 @@ function StepSite({
   setCustomUrl,
   customTag,
   setCustomTag,
+  companySlug,
   onSelect,
   onConfirmCustom,
 }: {
@@ -279,6 +284,7 @@ function StepSite({
   setCustomUrl: (v: string) => void;
   customTag: string;
   setCustomTag: (v: string) => void;
+  companySlug: string;
   onSelect: (s: Site) => void;
   onConfirmCustom: () => void;
 }) {
@@ -355,12 +361,13 @@ function StepSite({
             placeholder="тег (utm_campaign)"
             className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
           />
-          <button
-            onClick={onConfirmCustom}
-            className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)]"
-          >
-            Дальше →
-          </button>
+          <CustomSiteFinishButtons
+            url={customUrl}
+            tag={customTag}
+            companySlug={companySlug}
+            disabled={!customUrl.trim() || !customTag.trim()}
+            onProceed={onConfirmCustom}
+          />
         </div>
       )}
     </div>

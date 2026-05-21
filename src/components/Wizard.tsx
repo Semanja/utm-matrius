@@ -99,6 +99,7 @@ export default function Wizard({ companies, data }: Props) {
         <BranchAnonse
           channels={data[company.slug]?.channels ?? []}
           sites={data[company.slug]?.sites ?? []}
+          companySlug={company.slug}
           onBack={back}
           onReset={reset}
         />
@@ -108,6 +109,7 @@ export default function Wizard({ companies, data }: Props) {
         <BranchSmm
           channels={data[company.slug]?.channels ?? []}
           sites={data[company.slug]?.sites ?? []}
+          companySlug={company.slug}
           onBack={back}
           onReset={reset}
         />
@@ -117,6 +119,7 @@ export default function Wizard({ companies, data }: Props) {
         <BranchGuide
           sites={data[company.slug]?.sites ?? []}
           placements={data[company.slug]?.placements ?? []}
+          companySlug={company.slug}
           onBack={back}
           onReset={reset}
         />
@@ -126,6 +129,7 @@ export default function Wizard({ companies, data }: Props) {
         <BranchAds
           channels={data[company.slug]?.channels ?? []}
           sites={data[company.slug]?.sites ?? []}
+          companySlug={company.slug}
           onBack={back}
           onReset={reset}
         />

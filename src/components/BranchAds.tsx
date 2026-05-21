@@ -4,10 +4,12 @@ import { useMemo, useState } from "react";
 import type { Channel, Site } from "@/db/queries";
 import { extractUrlSlug } from "@/lib/utm";
 import EditableUtm from "./EditableUtm";
+import CustomSiteFinishButtons from "./CustomSiteFinishButtons";
 
 type Props = {
   channels: Channel[];
   sites: Site[];
+  companySlug: string;
   onBack: () => void;
   onReset: () => void;
 };
@@ -19,6 +21,7 @@ const OTHER = "other";
 export default function BranchAds({
   channels,
   sites,
+  companySlug,
   onBack,
   onReset,
 }: Props) {
@@ -160,6 +163,7 @@ export default function BranchAds({
           setCustomUrl={setCustomUrl}
           customTag={customTag}
           setCustomTag={setCustomTag}
+          companySlug={companySlug}
           onSelect={selectSite}
           onConfirmCustom={confirmCustomSite}
         />
@@ -336,6 +340,7 @@ function StepSite({
   setCustomUrl,
   customTag,
   setCustomTag,
+  companySlug,
   onSelect,
   onConfirmCustom,
 }: {
@@ -346,6 +351,7 @@ function StepSite({
   setCustomUrl: (v: string) => void;
   customTag: string;
   setCustomTag: (v: string) => void;
+  companySlug: string;
   onSelect: (s: Site) => void;
   onConfirmCustom: () => void;
 }) {
@@ -439,12 +445,13 @@ function StepSite({
               className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
             />
           )}
-          <button
-            onClick={onConfirmCustom}
-            className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)]"
-          >
-            Дальше →
-          </button>
+          <CustomSiteFinishButtons
+            url={customUrl}
+            tag={usesUrlSlug ? "" : customTag}
+            companySlug={companySlug}
+            disabled={!customUrl.trim() || (!usesUrlSlug && !customTag.trim())}
+            onProceed={onConfirmCustom}
+          />
         </div>
       )}
     </div>
