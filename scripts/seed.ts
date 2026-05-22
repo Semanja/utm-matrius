@@ -207,8 +207,10 @@ const zerocoderChannels: Channel[] = [
   { branch: "external", group_name: null, display_name: "Спикерство", utm_source: "pr", utm_medium: "speech", default_content: "спикер" },
   { branch: "external", group_name: null, display_name: "Подкаст", utm_source: "pr", utm_medium: "podcast", default_content: "спикер" },
 
-  // BLOG — Журнал (1 канал)
-  { branch: "blog", group_name: null, display_name: "Журнал", utm_source: "magazine", utm_medium: "article", default_content: "url-статья" },
+  // BLOG — Журнал (3 формата на выбор)
+  { branch: "blog", group_name: null, display_name: "Статья", utm_source: "magazine", utm_medium: "article", default_content: "url-статья" },
+  { branch: "blog", group_name: null, display_name: "Баннер", utm_source: "magazine", utm_medium: "banner", default_content: "url-статья" },
+  { branch: "blog", group_name: null, display_name: "Поп-ап", utm_source: "magazine", utm_medium: "pop-up", default_content: "url-статья" },
 
   // GETCOURSE — Геткурс (5 каналов)
   { branch: "getcourse", group_name: null, display_name: "Все тренинги", utm_source: "getcourse", utm_medium: "zerocoder", default_content: null },
