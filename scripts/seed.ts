@@ -157,6 +157,7 @@ await db.execute({
 const zerocoderChannels: Channel[] = [
   // ANNOUNCE — 12 каналов
   { branch: "announce", group_name: "email", display_name: "Почта", utm_source: "email", utm_medium: "zerocoder" },
+  { branch: "announce", group_name: "telegram", display_name: "Общая рассылка (zerocoder)", utm_source: "telegram", utm_medium: "zerocoder" },
   { branch: "announce", group_name: "telegram", display_name: "ТГ-бот (геткурс)", utm_source: "telegram", utm_medium: "zerocoder-gc" },
   { branch: "announce", group_name: "telegram", display_name: "ТГ-бот (воронки)", utm_source: "telegram", utm_medium: "zerocodity" },
   { branch: "announce", group_name: "telegram", display_name: "Помощник по безопасности", utm_source: "telegram", utm_medium: "antiscam_zero" },

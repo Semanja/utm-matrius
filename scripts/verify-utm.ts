@@ -99,26 +99,26 @@ const scenarios: Scenario[] = [
 
   // ============ ZEROCODER ============
   {
-    name: "Zerocoder Анонс / Почта / какая-то страница",
-    baseUrl: "https://zerocoder.ru/webinar-test",
-    source: "email",
+    name: "Zerocoder Анонс / Telegram zerocoder / реальный пример из рассылки",
+    baseUrl: "https://university.zerocoder.ru/demo-neuro-kids_order_mail",
+    source: "telegram",
     medium: "zerocoder",
-    campaign: extractUrlSlug("https://zerocoder.ru/webinar-test"),
+    campaign: "neuroteen", // отдельный тег активности, НЕ URL slug
     content: "announce",
-    term: TEST_DATE_NN,
+    term: "17.05.26", // без префикса date_
     expected_url:
-      "https://zerocoder.ru/webinar-test?utm_source=email&utm_medium=zerocoder&utm_campaign=webinar-test&utm_content=announce&utm_term=date_20.05.26",
+      "https://university.zerocoder.ru/demo-neuro-kids_order_mail?utm_source=telegram&utm_medium=zerocoder&utm_campaign=neuroteen&utm_content=announce&utm_term=17.05.26",
   },
   {
-    name: "Zerocoder Анонс / ТГ-бот геткурс",
-    baseUrl: "https://zerocoder.ru/promo",
+    name: "Zerocoder Анонс / ТГ-бот геткурс / тег != slug",
+    baseUrl: "https://zerocoder.ru/promo-page",
     source: "telegram",
     medium: "zerocoder-gc",
-    campaign: extractUrlSlug("https://zerocoder.ru/promo"),
+    campaign: "spring-promo", // тег активности
     content: "announce",
-    term: TEST_DATE_NN,
+    term: "20.05.26", // Zerocoder — без префикса date_
     expected_url:
-      "https://zerocoder.ru/promo?utm_source=telegram&utm_medium=zerocoder-gc&utm_campaign=promo&utm_content=announce&utm_term=date_20.05.26",
+      "https://zerocoder.ru/promo-page?utm_source=telegram&utm_medium=zerocoder-gc&utm_campaign=spring-promo&utm_content=announce&utm_term=20.05.26",
   },
   {
     name: "Zerocoder Воронка / Продажное письмо ТГ-бот",

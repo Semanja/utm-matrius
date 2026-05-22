@@ -41,6 +41,11 @@ export default function BranchAnonse({
 
   const [site, setSite] = useState<Site | null>(null);
   const [customUrl, setCustomUrl] = useState<string>("");
+  const [customTag, setCustomTag] = useState<string>("");
+
+  // У Zerocoder свои правила: campaign — отдельный «тег активности» (не хвост URL),
+  // utm_term без префикса date_
+  const isZerocoder = companySlug === "zerocoder";
 
   const [date, setDate] = useState<string>(today());
 
@@ -118,11 +123,13 @@ export default function BranchAnonse({
 
   function confirmCustomSite() {
     if (!customUrl.trim()) return;
+    // Для Zerocoder требуем тег отдельно (= utm_campaign).
+    // Для Matrius — tag не нужен, campaign = хвост URL.
+    if (isZerocoder && !customTag.trim()) return;
     setSite({
       id: -1,
       url: customUrl.trim(),
-      // Для анонса tag не используется — campaign берётся из URL
-      tag: "",
+      tag: customTag.trim(),
     });
     setStep("date");
   }
@@ -193,6 +200,9 @@ export default function BranchAnonse({
           sites={sites}
           customUrl={customUrl}
           setCustomUrl={setCustomUrl}
+          customTag={customTag}
+          setCustomTag={setCustomTag}
+          isZerocoder={isZerocoder}
           companySlug={companySlug}
           onSelect={selectSite}
           onConfirmCustom={confirmCustomSite}
@@ -200,11 +210,16 @@ export default function BranchAnonse({
       )}
 
       {step === "date" && (
-        <StepDate date={date} setDate={setDate} onConfirm={confirmDate} />
+        <StepDate
+          date={date}
+          setDate={setDate}
+          isZerocoder={isZerocoder}
+          onConfirm={confirmDate}
+        />
       )}
 
       {step === "result" && channel && site && (
-        <StepResult channel={channel} site={site} date={date} />
+        <StepResult channel={channel} site={site} date={date} isZerocoder={isZerocoder} />
       )}
 
       <div className="flex gap-4 mt-6">
@@ -406,6 +421,9 @@ function StepSite({
   sites,
   customUrl,
   setCustomUrl,
+  customTag,
+  setCustomTag,
+  isZerocoder,
   companySlug,
   onSelect,
   onConfirmCustom,
@@ -413,6 +431,9 @@ function StepSite({
   sites: Site[];
   customUrl: string;
   setCustomUrl: (v: string) => void;
+  customTag: string;
+  setCustomTag: (v: string) => void;
+  isZerocoder: boolean;
   companySlug: string;
   onSelect: (s: Site) => void;
   onConfirmCustom: () => void;
@@ -483,10 +504,20 @@ function StepSite({
             placeholder="https://..."
             className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
           />
+          {isZerocoder && (
+            <input
+              type="text"
+              value={customTag}
+              onChange={(e) => setCustomTag(e.target.value)}
+              placeholder="тег активности (utm_campaign), напр. neuroteen"
+              className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)]"
+            />
+          )}
           <CustomSiteFinishButtons
             url={customUrl}
+            tag={isZerocoder ? customTag : undefined}
             companySlug={companySlug}
-            disabled={!customUrl.trim()}
+            disabled={!customUrl.trim() || (isZerocoder && !customTag.trim())}
             onProceed={onConfirmCustom}
           />
         </div>
@@ -498,21 +529,27 @@ function StepSite({
 function StepDate({
   date,
   setDate,
+  isZerocoder,
   onConfirm,
 }: {
   date: string;
   setDate: (d: string) => void;
+  isZerocoder: boolean;
   onConfirm: () => void;
 }) {
   const min = today();
   const max = todayPlusDays(14);
+  const termPreview = isZerocoder
+    ? formatDateDisplay(date)
+    : `date_${formatDateDisplay(date)}`;
+  const termFormat = isZerocoder ? "дд.мм.гг" : "date_дд.мм.гг";
 
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Шаг 5: Дата</h2>
       <p className="text-sm text-[var(--text-muted)] mb-3">
         От сегодня до +14 дней. В <code>utm_term</code> попадёт как{" "}
-        <code>date_дд.мм.гг</code>.
+        <code>{termFormat}</code>.
       </p>
       <input
         type="date"
@@ -525,7 +562,7 @@ function StepDate({
       <p className="text-sm text-[var(--text-muted)] mb-4">
         В метку:{" "}
         <code className="bg-[var(--surface)] px-1.5 py-0.5 rounded">
-          date_{formatDateDisplay(date)}
+          {termPreview}
         </code>
       </p>
       <button
@@ -542,13 +579,21 @@ function StepResult({
   channel,
   site,
   date,
+  isZerocoder,
 }: {
   channel: Channel;
   site: Site;
   date: string;
+  isZerocoder: boolean;
 }) {
-  const utmTerm = `date_${formatDateDisplay(date)}`;
-  const campaign = extractUrlSlug(site.url);
+  // Term: Zerocoder без префикса (просто дата), Matrius с префиксом date_
+  const utmTerm = isZerocoder
+    ? formatDateDisplay(date)
+    : `date_${formatDateDisplay(date)}`;
+  // Campaign: Zerocoder — тег активности (site.tag), Matrius — хвост URL
+  const campaign = isZerocoder
+    ? site.tag || extractUrlSlug(site.url)
+    : extractUrlSlug(site.url);
 
   return (
     <div>
