@@ -21,7 +21,14 @@ type Props = {
   onReset: () => void;
 };
 
-type SimpleStep = "channel" | "site" | "article" | "result";
+type SimpleStep =
+  | "channel"
+  | "campaign" // только для external — категория + тег
+  | "speaker" // только для external — имя спикера
+  | "site"
+  | "article" // только для blog — URL статьи
+  | "date" // для external и blog
+  | "result";
 
 export default function BranchSimple({
   branch,
@@ -42,18 +49,28 @@ export default function BranchSimple({
   const [customUrl, setCustomUrl] = useState("");
   const [customTag, setCustomTag] = useState("");
   const [articleUrl, setArticleUrl] = useState("");
+  const [campaignCategory, setCampaignCategory] = useState<string>("партнер");
+  const [campaignValue, setCampaignValue] = useState("");
+  const [speakerName, setSpeakerName] = useState("");
+  const [date, setDate] = useState<string>(todayISO());
 
   const isZerocoder = companySlug === "zerocoder";
   const isBlog = branch === "blog";
+  const isExternal = branch === "external";
+  const needsDate = isBlog || isExternal;
 
   const branchChannels = useMemo(
     () => channels.filter((c) => c.branch === branch),
     [channels, branch]
   );
 
+  function nextAfterChannel() {
+    setStep(isExternal ? "campaign" : "site");
+  }
+
   function selectChannel(c: Channel) {
     setChannel(c);
-    setStep("site");
+    nextAfterChannel();
   }
 
   function confirmCustomChannel() {
@@ -70,40 +87,58 @@ export default function BranchSimple({
       default_content: null,
       default_term: null,
     });
+    nextAfterChannel();
+  }
+
+  function confirmCampaign() {
+    if (!campaignValue.trim()) return;
+    setStep("speaker");
+  }
+
+  function confirmSpeaker() {
+    if (!speakerName.trim()) return;
     setStep("site");
+  }
+
+  function nextAfterSite() {
+    if (isBlog) setStep("article");
+    else if (needsDate) setStep("date");
+    else setStep("result");
   }
 
   function selectSite(s: Site) {
     setSite(s);
-    setStep(isBlog ? "article" : "result");
+    nextAfterSite();
   }
 
   function confirmCustomSite() {
     if (!customUrl.trim()) return;
-    // Для Zerocoder требуем тег отдельно. Для других — извлекаем из URL.
     if (isZerocoder && !customTag.trim()) return;
     setSite({
       id: -1,
       url: customUrl.trim(),
       tag: isZerocoder ? customTag.trim() : extractUrlSlug(customUrl.trim()),
     });
-    setStep(isBlog ? "article" : "result");
+    nextAfterSite();
   }
 
   function confirmArticle() {
     if (!articleUrl.trim()) return;
+    setStep(needsDate ? "date" : "result");
+  }
+
+  function confirmDate() {
+    if (!date) return;
     setStep("result");
   }
 
   function backStep() {
-    if (step === "site") {
-      setSite(null);
-      setStep("channel");
-    } else if (step === "article") {
-      setStep("site");
-    } else if (step === "result") {
-      setStep(isBlog ? "article" : "site");
-    }
+    if (step === "campaign") setStep("channel");
+    else if (step === "speaker") setStep("campaign");
+    else if (step === "site") setStep(isExternal ? "speaker" : "channel");
+    else if (step === "article") setStep("site");
+    else if (step === "date") setStep(isBlog ? "article" : "site");
+    else if (step === "result") setStep(needsDate ? "date" : isBlog ? "article" : "site");
   }
 
   return (
@@ -137,6 +172,24 @@ export default function BranchSimple({
         />
       )}
 
+      {step === "campaign" && (
+        <StepCampaign
+          category={campaignCategory}
+          setCategory={setCampaignCategory}
+          value={campaignValue}
+          setValue={setCampaignValue}
+          onConfirm={confirmCampaign}
+        />
+      )}
+
+      {step === "speaker" && (
+        <StepSpeaker
+          name={speakerName}
+          setName={setSpeakerName}
+          onConfirm={confirmSpeaker}
+        />
+      )}
+
       {step === "article" && (
         <StepArticle
           articleUrl={articleUrl}
@@ -145,11 +198,18 @@ export default function BranchSimple({
         />
       )}
 
+      {step === "date" && (
+        <StepDate date={date} setDate={setDate} onConfirm={confirmDate} />
+      )}
+
       {step === "result" && channel && site && (
         <StepResult
           channel={channel}
           site={site}
           articleUrl={isBlog ? articleUrl : null}
+          campaignOverride={isExternal ? campaignValue : null}
+          speakerOverride={isExternal ? speakerName : null}
+          dateValue={needsDate ? date : null}
         />
       )}
 
@@ -442,18 +502,173 @@ function StepArticle({
   );
 }
 
+function StepCampaign({
+  category,
+  setCategory,
+  value,
+  setValue,
+  onConfirm,
+}: {
+  category: string;
+  setCategory: (v: string) => void;
+  value: string;
+  setValue: (v: string) => void;
+  onConfirm: () => void;
+}) {
+  const options = [
+    { value: "партнер", label: "Партнёр", hint: "имя/название партнёра" },
+    { value: "вебинар", label: "Вебинар", hint: "тег вебинара" },
+    { value: "тег активности", label: "Тег активности", hint: "общий тег" },
+  ];
+  const current = options.find((o) => o.value === category) ?? options[0];
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Тег кампании</h2>
+      <p className="text-sm text-[var(--text-muted)] mb-3">
+        Выбери тип, потом введи конкретное значение. Пойдёт в{" "}
+        <code>utm_campaign</code>.
+      </p>
+      <div className="flex flex-wrap gap-2 mb-3">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            onClick={() => setCategory(o.value)}
+            className={`text-sm px-3 py-1.5 rounded border transition ${
+              category === o.value
+                ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-text)]"
+                : "border-[var(--border)] hover:border-[var(--accent)]"
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={current.hint}
+        className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)] mb-3"
+      />
+      <button
+        onClick={onConfirm}
+        disabled={!value.trim()}
+        className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+      >
+        Дальше →
+      </button>
+    </div>
+  );
+}
+
+function StepSpeaker({
+  name,
+  setName,
+  onConfirm,
+}: {
+  name: string;
+  setName: (v: string) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Имя спикера</h2>
+      <p className="text-sm text-[var(--text-muted)] mb-3">
+        Имя выступающего. Пойдёт в <code>utm_content</code>.
+      </p>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="например: Иван Иванов"
+        className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)] mb-3"
+      />
+      <button
+        onClick={onConfirm}
+        disabled={!name.trim()}
+        className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+      >
+        Дальше →
+      </button>
+    </div>
+  );
+}
+
+function StepDate({
+  date,
+  setDate,
+  onConfirm,
+}: {
+  date: string;
+  setDate: (d: string) => void;
+  onConfirm: () => void;
+}) {
+  const min = todayISO();
+  const max = todayPlusDaysISO(14);
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Дата</h2>
+      <p className="text-sm text-[var(--text-muted)] mb-3">
+        От сегодня до +14 дней. В <code>utm_term</code> попадёт как{" "}
+        <code>дд.мм.гг</code>.
+      </p>
+      <input
+        type="date"
+        value={date}
+        min={min}
+        max={max}
+        onChange={(e) => setDate(e.target.value)}
+        className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)] mb-2"
+      />
+      <p className="text-sm text-[var(--text-muted)] mb-3">
+        В метку:{" "}
+        <code className="bg-[var(--surface)] px-1.5 py-0.5 rounded">
+          {formatDateDisplay(date)}
+        </code>
+      </p>
+      <button
+        onClick={onConfirm}
+        className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)]"
+      >
+        Дальше →
+      </button>
+    </div>
+  );
+}
+
 function StepResult({
   channel,
   site,
   articleUrl,
+  campaignOverride,
+  speakerOverride,
+  dateValue,
 }: {
   channel: Channel;
   site: Site;
   articleUrl: string | null;
+  campaignOverride: string | null;
+  speakerOverride: string | null;
+  dateValue: string | null;
 }) {
-  const campaign = site.tag || extractUrlSlug(site.url);
-  // Для блога content = URL статьи, иначе берём дефолт канала
-  const content = articleUrl ?? channel.default_content ?? "";
+  const campaign =
+    campaignOverride !== null && campaignOverride !== ""
+      ? campaignOverride
+      : site.tag || extractUrlSlug(site.url);
+
+  // Контент: для блога — URL статьи; для external — имя спикера; иначе дефолт канала
+  const content =
+    articleUrl !== null && articleUrl !== ""
+      ? articleUrl
+      : speakerOverride !== null && speakerOverride !== ""
+      ? speakerOverride
+      : channel.default_content ?? "";
+
+  // Term: если есть дата — дд.мм.гг (без префикса для Zerocoder); иначе дефолт канала
+  const term = dateValue
+    ? formatDateDisplay(dateValue)
+    : channel.default_term ?? "";
 
   return (
     <div>
@@ -468,9 +683,34 @@ function StepResult({
           medium: channel.utm_medium ?? "",
           campaign,
           content,
-          term: channel.default_term ?? "",
+          term,
         }}
       />
     </div>
   );
+}
+
+function todayISO(): string {
+  const d = new Date();
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+function todayPlusDaysISO(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+function formatDateDisplay(yyyymmdd: string): string {
+  if (!yyyymmdd || !yyyymmdd.includes("-")) return "";
+  const [y, m, d] = yyyymmdd.split("-");
+  return `${d}.${m}.${y.slice(2)}`;
 }

@@ -171,7 +171,9 @@ const zerocoderChannels: Channel[] = [
   { branch: "announce", group_name: "youtube", display_name: "YouTube", utm_source: "yt", utm_medium: null, needs_manual_medium: 1 },
 
   // ADS — по людям
-  { branch: "ads", group_name: "Вика", display_name: "Я.Директ", utm_source: "yandex", utm_medium: "vika" },
+  { branch: "ads", group_name: "Вика", display_name: "Я.Директ — кабинет 2", utm_source: "Yandex_vika_kab2", utm_medium: "cpc" },
+  { branch: "ads", group_name: "Вика", display_name: "Я.Директ — кабинет 3", utm_source: "Yandex_vika_kab3", utm_medium: "cpc" },
+  { branch: "ads", group_name: "Вика", display_name: "Я.Директ — общий", utm_source: "Yandex_vika", utm_medium: "cpc" },
   { branch: "ads", group_name: "Вика", display_name: "ТГ-адс", utm_source: "tg_ads", utm_medium: "vika" },
   { branch: "ads", group_name: "Вика", display_name: "Facebook", utm_source: "vika_fb_Mir", utm_medium: "динамичная" },
   { branch: "ads", group_name: "Vlad", display_name: "Google", utm_source: "google", utm_medium: "cpc" },
