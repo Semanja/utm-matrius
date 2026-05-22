@@ -188,10 +188,10 @@ const zerocoderChannels: Channel[] = [
   { branch: "ads", group_name: "Филипп", display_name: "Facebook", utm_source: "fb", utm_medium: "metapr" },
   { branch: "ads", group_name: "Роман", display_name: "Facebook", utm_source: "fb", utm_medium: "roman01" },
 
-  // GUIDE — 3 канала
-  { branch: "guide", group_name: "email", display_name: "Почта", utm_source: "email", utm_medium: "zerocoder" },
-  { branch: "guide", group_name: "telegram", display_name: "Телеграм-бот", utm_source: "telegram", utm_medium: "bot_zerocoder" },
-  { branch: "guide", group_name: "vk", display_name: "ВК-бот", utm_source: "vk", utm_medium: "zerocoders" },
+  // GUIDE — 3 канала (utm_content=guide)
+  { branch: "guide", group_name: "email", display_name: "Почта", utm_source: "email", utm_medium: "zerocoder", default_content: "guide" },
+  { branch: "guide", group_name: "telegram", display_name: "Телеграм-бот", utm_source: "telegram", utm_medium: "bot_zerocoder", default_content: "guide" },
+  { branch: "guide", group_name: "vk", display_name: "ВК-бот", utm_source: "vk", utm_medium: "zerocoders", default_content: "guide" },
 
   // FUNNEL — Воронка вебинара (10 каналов)
   { branch: "funnel", group_name: "Продажное письмо", display_name: "Почта", utm_source: "email", utm_medium: "zerocoder", default_content: "funnel", default_term: "message-N" },

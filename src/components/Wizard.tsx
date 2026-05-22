@@ -147,10 +147,22 @@ export default function Wizard({ companies, data }: Props) {
         />
       )}
 
-      {step === "branch" && company && taskType === "guide" && (
+      {step === "branch" && company && taskType === "guide" && company.slug === "matrius" && (
         <BranchGuide
           sites={data[company.slug]?.sites ?? []}
           placements={data[company.slug]?.placements ?? []}
+          companySlug={company.slug}
+          onBack={back}
+          onReset={reset}
+        />
+      )}
+
+      {step === "branch" && company && taskType === "guide" && company.slug !== "matrius" && (
+        <BranchSimple
+          branch="guide"
+          branchLabel="Гайд"
+          channels={data[company.slug]?.channels ?? []}
+          sites={data[company.slug]?.sites ?? []}
           companySlug={company.slug}
           onBack={back}
           onReset={reset}
