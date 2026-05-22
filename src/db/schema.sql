@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS channels (
 -- ALTER для существующих таблиц (миграция). Если колонки уже есть — ошибка проигнорируется в миграторе.
 ALTER TABLE channels ADD COLUMN default_content TEXT;
 ALTER TABLE channels ADD COLUMN default_term TEXT;
+ALTER TABLE channels ADD COLUMN default_campaign TEXT;
 
 -- Места размещения (для ветки Гайд)
 CREATE TABLE IF NOT EXISTS placements (

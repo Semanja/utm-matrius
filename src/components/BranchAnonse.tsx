@@ -111,6 +111,7 @@ export default function BranchAnonse({
       needs_manual_medium: false,
       default_content: null,
       default_term: null,
+      default_campaign: null,
     });
     setStep("site");
   }

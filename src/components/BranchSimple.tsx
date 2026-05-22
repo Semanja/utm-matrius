@@ -22,7 +22,9 @@ type Props = {
 };
 
 type SimpleStep =
+  | "voronka-step" // только для funnel — выбор «Шаг/письмо»
   | "channel"
+  | "message-n" // только для funnel/Продажное письмо — номер сообщения N
   | "campaign" // только для external — категория + тег
   | "speaker" // только для external — имя спикера
   | "site"
@@ -39,7 +41,12 @@ export default function BranchSimple({
   onBack,
   onReset,
 }: Props) {
-  const [step, setStep] = useState<SimpleStep>("channel");
+  const isFunnel = branch === "funnel";
+  const [step, setStep] = useState<SimpleStep>(
+    isFunnel ? "voronka-step" : "channel"
+  );
+  const [voronkaStep, setVoronkaStep] = useState<string>(""); // Продажное / Вход / Шальной
+  const [messageN, setMessageN] = useState<string>("");
 
   const [channel, setChannel] = useState<Channel | null>(null);
   const [customSource, setCustomSource] = useState("");
@@ -64,21 +71,55 @@ export default function BranchSimple({
     [channels, branch]
   );
 
-  function nextAfterChannel() {
-    setStep(isExternal ? "campaign" : "site");
+  // Для воронки — фильтруем по выбранному шагу
+  const channelsToShow = useMemo(() => {
+    if (isFunnel && voronkaStep) {
+      return branchChannels.filter((c) => c.group_name === voronkaStep);
+    }
+    return branchChannels;
+  }, [isFunnel, voronkaStep, branchChannels]);
+
+  // Доступные «шаги» воронки — из group_name каналов
+  const voronkaSteps = useMemo(() => {
+    if (!isFunnel) return [];
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const c of branchChannels) {
+      if (c.group_name && !seen.has(c.group_name)) {
+        seen.add(c.group_name);
+        result.push(c.group_name);
+      }
+    }
+    return result;
+  }, [isFunnel, branchChannels]);
+
+  function nextAfterChannel(c: Channel) {
+    if (isExternal) {
+      setStep("campaign");
+    } else if (isFunnel && c.default_term && c.default_term.includes("N")) {
+      // Продажное письмо — спросим номер сообщения
+      setStep("message-n");
+    } else {
+      setStep("site");
+    }
+  }
+
+  function selectVoronkaStep(s: string) {
+    setVoronkaStep(s);
+    setStep("channel");
   }
 
   function selectChannel(c: Channel) {
     setChannel(c);
-    nextAfterChannel();
+    nextAfterChannel(c);
   }
 
   function confirmCustomChannel() {
     if (!customSource.trim() && !customMedium.trim()) return;
-    setChannel({
+    const c: Channel = {
       id: -1,
       branch,
-      group_name: null,
+      group_name: isFunnel ? voronkaStep || null : null,
       display_name: "Свой вариант",
       utm_source: customSource.trim(),
       utm_medium: customMedium.trim() || null,
@@ -86,8 +127,15 @@ export default function BranchSimple({
       needs_manual_medium: false,
       default_content: null,
       default_term: null,
-    });
-    nextAfterChannel();
+      default_campaign: null,
+    };
+    setChannel(c);
+    nextAfterChannel(c);
+  }
+
+  function confirmMessageN() {
+    if (!messageN.trim()) return;
+    setStep("site");
   }
 
   function confirmCampaign() {
@@ -133,9 +181,18 @@ export default function BranchSimple({
   }
 
   function backStep() {
-    if (step === "campaign") setStep("channel");
+    if (step === "channel" && isFunnel) {
+      setVoronkaStep("");
+      setChannel(null);
+      setStep("voronka-step");
+    } else if (step === "message-n") setStep("channel");
+    else if (step === "campaign") setStep("channel");
     else if (step === "speaker") setStep("campaign");
-    else if (step === "site") setStep(isExternal ? "speaker" : "channel");
+    else if (step === "site") {
+      if (isExternal) setStep("speaker");
+      else if (isFunnel && channel?.default_term?.includes("N")) setStep("message-n");
+      else setStep("channel");
+    }
     else if (step === "article") setStep("site");
     else if (step === "date") setStep(isBlog ? "article" : "site");
     else if (step === "result") setStep(needsDate ? "date" : isBlog ? "article" : "site");
@@ -145,16 +202,31 @@ export default function BranchSimple({
     <section>
       <Breadcrumbs branchLabel={branchLabel} channel={channel} site={site} />
 
+      {step === "voronka-step" && (
+        <StepVoronkaSelect
+          steps={voronkaSteps}
+          onSelect={selectVoronkaStep}
+        />
+      )}
+
       {step === "channel" && (
         <StepChannel
           branchLabel={branchLabel}
-          channels={branchChannels}
+          channels={channelsToShow}
           customSource={customSource}
           setCustomSource={setCustomSource}
           customMedium={customMedium}
           setCustomMedium={setCustomMedium}
           onSelect={selectChannel}
           onConfirmCustom={confirmCustomChannel}
+        />
+      )}
+
+      {step === "message-n" && (
+        <StepMessageN
+          n={messageN}
+          setN={setMessageN}
+          onConfirm={confirmMessageN}
         />
       )}
 
@@ -210,6 +282,7 @@ export default function BranchSimple({
           campaignOverride={isExternal ? campaignValue : null}
           speakerOverride={isExternal ? speakerName : null}
           dateValue={needsDate ? date : null}
+          messageN={isFunnel ? messageN : null}
         />
       )}
 
@@ -502,6 +575,69 @@ function StepArticle({
   );
 }
 
+function StepVoronkaSelect({
+  steps,
+  onSelect,
+}: {
+  steps: string[];
+  onSelect: (s: string) => void;
+}) {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Воронка вебинара: шаг</h2>
+      <p className="text-sm text-[var(--text-muted)] mb-4">
+        Выбери на каком этапе воронки используется ссылка.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        {steps.map((s) => (
+          <button
+            key={s}
+            onClick={() => onSelect(s)}
+            className="border border-[var(--border)] rounded-lg px-4 py-3 text-left hover:border-[var(--accent)] hover:bg-[var(--bg)] transition"
+          >
+            <div className="font-semibold text-sm">{s}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepMessageN({
+  n,
+  setN,
+  onConfirm,
+}: {
+  n: string;
+  setN: (v: string) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold mb-2">Номер сообщения</h2>
+      <p className="text-sm text-[var(--text-muted)] mb-3">
+        Какое по счёту письмо в цепочке. Подставится в{" "}
+        <code>utm_term=message-N</code>.
+      </p>
+      <input
+        type="number"
+        value={n}
+        onChange={(e) => setN(e.target.value)}
+        placeholder="1, 2, 3..."
+        min={1}
+        className="w-full border border-[var(--border)] rounded px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent)] mb-3"
+      />
+      <button
+        onClick={onConfirm}
+        disabled={!n.trim()}
+        className="bg-[var(--accent)] text-[var(--accent-text)] rounded px-4 py-2 text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+      >
+        Дальше →
+      </button>
+    </div>
+  );
+}
+
 function StepCampaign({
   category,
   setCategory,
@@ -644,6 +780,7 @@ function StepResult({
   campaignOverride,
   speakerOverride,
   dateValue,
+  messageN,
 }: {
   channel: Channel;
   site: Site;
@@ -651,11 +788,16 @@ function StepResult({
   campaignOverride: string | null;
   speakerOverride: string | null;
   dateValue: string | null;
+  messageN: string | null;
 }) {
+  // Campaign: приоритет — пользовательский override (external) → default_campaign канала
+  // → site.tag → URL slug
   const campaign =
     campaignOverride !== null && campaignOverride !== ""
       ? campaignOverride
-      : site.tag || extractUrlSlug(site.url);
+      : channel.default_campaign ||
+        site.tag ||
+        extractUrlSlug(site.url);
 
   // Контент: для блога — URL статьи; для external — имя спикера; иначе дефолт канала
   const content =
@@ -665,10 +807,13 @@ function StepResult({
       ? speakerOverride
       : channel.default_content ?? "";
 
-  // Term: если есть дата — дд.мм.гг (без префикса для Zerocoder); иначе дефолт канала
-  const term = dateValue
+  // Term: если есть дата → дд.мм.гг; для воронки с N → подставляем N; иначе дефолт канала
+  let term = dateValue
     ? formatDateDisplay(dateValue)
     : channel.default_term ?? "";
+  if (messageN && term.includes("N")) {
+    term = term.replace(/N/g, messageN);
+  }
 
   return (
     <div>

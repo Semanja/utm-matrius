@@ -54,6 +54,7 @@ type Channel = {
   needs_manual_medium?: number;
   default_content?: string | null;
   default_term?: string | null;
+  default_campaign?: string | null;
 };
 
 const channels: Channel[] = [
@@ -103,8 +104,8 @@ await db.execute({
 
 for (const c of channels) {
   await db.execute({
-    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium, default_content, default_term)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium, default_content, default_term, default_campaign)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       matriusId,
       c.branch,
@@ -116,6 +117,7 @@ for (const c of channels) {
       c.needs_manual_medium ?? 0,
       c.default_content ?? null,
       c.default_term ?? null,
+      c.default_campaign ?? null,
     ],
   });
 }
@@ -215,7 +217,7 @@ const zerocoderChannels: Channel[] = [
   { branch: "blog", group_name: null, display_name: "Поп-ап", utm_source: "magazine", utm_medium: "pop-up", default_content: "url-статья" },
 
   // GETCOURSE — Геткурс (5 каналов)
-  { branch: "getcourse", group_name: null, display_name: "Все тренинги", utm_source: "getcourse", utm_medium: "zerocoder", default_content: null },
+  { branch: "getcourse", group_name: null, display_name: "Все тренинги", utm_source: "getcourse", utm_medium: "zerocoder", default_campaign: "training" },
   { branch: "getcourse", group_name: null, display_name: "Запись вебинара", utm_source: "site", utm_medium: "getcourse", default_content: "record" },
   { branch: "getcourse", group_name: null, display_name: "Интенсив", utm_source: "site", utm_medium: "getcourse", default_content: "lesson" },
   { branch: "getcourse", group_name: null, display_name: "Урок платного курса", utm_source: "site", utm_medium: "getcourse", default_content: "тег-урока" },
@@ -224,8 +226,8 @@ const zerocoderChannels: Channel[] = [
 
 for (const c of zerocoderChannels) {
   await db.execute({
-    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium, default_content, default_term)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO channels (company_id, branch, group_name, display_name, utm_source, utm_medium, needs_url_slug, needs_manual_medium, default_content, default_term, default_campaign)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       zerocoderId,
       c.branch,
@@ -237,6 +239,7 @@ for (const c of zerocoderChannels) {
       c.needs_manual_medium ?? 0,
       c.default_content ?? null,
       c.default_term ?? null,
+      c.default_campaign ?? null,
     ],
   });
 }

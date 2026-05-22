@@ -38,12 +38,22 @@ export default function EditableUtm({ initial }: Props) {
     setEditing(false);
   }
 
+  const hasPlaceholders =
+    /\{[^}]+\}/.test(url);
+
   return (
     <div className="border border-emerald-500/40 bg-emerald-500/10 rounded-lg p-4">
       {editing ? (
         <EditableChain fields={fields} onChange={update} />
       ) : (
         <p className="break-all text-sm font-mono mb-3 select-all">{url}</p>
+      )}
+
+      {hasPlaceholders && (
+        <p className="text-xs text-[var(--text-muted)] mb-2 italic">
+          💡 Значения в фигурных скобках типа <code>{"{campaign_id}"}</code> рекламная
+          система (Яндекс / Facebook) подставит автоматически — оставь их как есть.
+        </p>
       )}
 
       <div className="flex flex-wrap gap-2 mt-3">
