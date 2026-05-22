@@ -29,6 +29,36 @@ export async function createSite(formData: FormData) {
   const slug = await getAdminCompany();
   const companyId = await getCompanyId(slug);
 
+  // Проверим есть ли уже такой URL (включая soft-deleted)
+  const existing = await db.execute({
+    sql: `SELECT id, tag, deleted_at FROM sites WHERE company_id = ? AND url = ?`,
+    args: [companyId, url],
+  });
+
+  if (existing.rows.length > 0) {
+    const existingId = Number(existing.rows[0].id);
+    const existingTag = String(existing.rows[0].tag);
+    const isDeleted = existing.rows[0].deleted_at !== null;
+
+    if (isDeleted) {
+      // Был удалён — восстанавливаем и обновляем тег
+      await db.execute({
+        sql: `UPDATE sites SET tag = ?, deleted_at = NULL WHERE id = ?`,
+        args: [tag, existingId],
+      });
+      await logAudit("sites", existingId, "restore", null, { url, tag });
+      revalidatePath("/admin/sites");
+      return;
+    }
+
+    // Активная запись с тем же URL — нельзя добавить дубликат
+    throw new Error(
+      existingTag === tag
+        ? `Этот URL уже есть в справочнике (тег: ${existingTag})`
+        : `Этот URL уже есть с тегом «${existingTag}». Открой строку «Изменить», чтобы поменять тег.`
+    );
+  }
+
   const res = await db.execute({
     sql: `INSERT INTO sites (company_id, url, tag) VALUES (?, ?, ?)`,
     args: [companyId, url, tag],
