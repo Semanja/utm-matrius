@@ -18,14 +18,30 @@
 
 ## Скриншоты
 
-<!-- Вставь скриншоты сюда -->
-<!--
-Пример:
-![Выбор компании](link-to-screenshot)
-![Мастер анонса](link-to-screenshot)
-![Результат с редактором](link-to-screenshot)
-![Админка — список сайтов](link-to-screenshot)
--->
+<p align="center">
+  <img src="public/screenshots/00-main-wizard.jpg" width="600" alt="Главная страница мастера">
+  <br><em>Главная — выбор компании и типа задачи</em>
+</p>
+
+<p align="center">
+  <img src="public/screenshots/01-choose-company.jpg" width="400" alt="Выбор компании">
+  <br><em>Выбор компании</em>
+</p>
+
+<p align="center">
+  <img src="public/screenshots/04-editable-utm.jpg" width="600" alt="Редактирование UTM">
+  <br><em>Редактор «паровозик» — финальную ссылку можно поправить в браузере</em>
+</p>
+
+<p align="center">
+  <img src="public/screenshots/02-custom-theme.jpg" width="400" alt="Своя тема оформления">
+  <br><em>Редактор своей темы оформления</em>
+</p>
+
+<p align="center">
+  <img src="public/screenshots/03-admin-panel.jpg" width="600" alt="Админка">
+  <br><em>Админка — управление справочниками</em>
+</p>
 
 ## Стек
 
