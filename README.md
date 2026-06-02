@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UTM Generator
 
-## Getting Started
+Пошаговый мастер для сборки UTM-меток по правилам компании. Два бренда в одном приложении — Matrius и Zerocoder.
 
-First, run the development server:
+**Деплой:** [utm-matrius.vercel.app](https://utm-matrius.vercel.app)
+
+## Возможности
+
+- **Пошаговый мастер** — выбираешь компанию → тип задачи → платформу/канал → сайт → дату, получаешь готовую UTM-ссылку
+- **Две компании** — Matrius и Zerocoder, у каждой свой набор каналов и логика формирования меток
+- **9 типов задач** — Анонс, СММ, Гайд, Реклама, Воронка вебинара, Внешние выступления, Блог, Геткурс, Свой вариант
+- **Ручной режим** — если нужна метка без привязки к настроенным справочникам
+- **Редактор «паровозик»** — финальную UTM-строку можно поправить прямо в браузере до копирования
+- **5 тем оформления** — светлая, тёмная, Zerocoder, Matrius, своя (с редактором цветов)
+- **Админка** — управление сайтами, каналами, местами размещения
+- **Массовый импорт** — загрузка сайтов с тегами из TSV/CSV
+- **Журнал изменений** — аудит всех действий с возможностью отката
+
+## Скриншоты
+
+<!-- Вставь скриншоты сюда -->
+<!--
+Пример:
+![Выбор компании](link-to-screenshot)
+![Мастер анонса](link-to-screenshot)
+![Результат с редактором](link-to-screenshot)
+![Админка — список сайтов](link-to-screenshot)
+-->
+
+## Стек
+
+- **Next.js 16** (App Router)
+- **React 19**
+- **TypeScript**
+- **Tailwind CSS 4**
+- **Turso** (облачный SQLite, libsql)
+- **Vercel** — деплой
+
+## Запуск локально
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.local.example .env.local  # заполни DATABASE_URL и ADMIN_SESSION_TOKEN
+npm run dev                        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Управление БД
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run db:migrate  # применить схему
+npm run db:seed     # наполнить тестовыми данными
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Структура проекта
 
-## Learn More
+```
+src/
+├── app/
+│   ├── admin/       # админка (сайты, каналы, размещения, история)
+│   ├── api/         # API-маршруты
+│   ├── login/       # страница входа
+│   ├── layout.tsx
+│   ├── page.tsx     # главная — точка входа в мастер
+│   └── globals.css  # CSS-переменные тем
+├── components/
+│   ├── admin/       # компоненты админки
+│   ├── Wizard.tsx   # корневой мастер
+│   ├── Branch*.tsx  # ветки под типы задач
+│   ├── EditableUtm.tsx  # редактор UTM-строки
+│   └── ...прочие
+├── db/              # клиент, запросы, схема
+└── lib/             # утилиты: UTM, авторизация, аудит
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Лицензия
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
