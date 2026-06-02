@@ -40,6 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Claude Code локальные настройки разрешений
-.claude/
+# Claude Code — сессии, настройки разрешений
+.claude/**/commands.json
 </content>
