@@ -52,7 +52,7 @@
 - **Turso** (облачный SQLite, libsql)
 - **Vercel** — деплой
 
-## Запуск локально
+## Разработка
 
 ```bash
 npm install
